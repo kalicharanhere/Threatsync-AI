@@ -1,4 +1,7 @@
-# Threat Report Analyzer
+# ThreatSync AI - First RAG project
+
+Idea - Hunting TTPs from the CTIs maps them with detection rules to evaluate our coverage
+
 A lightweight tool to parse threat reports, map actions to MITRE ATT&CK, and evaluate detection rules.
 
 ## Tech Stack
