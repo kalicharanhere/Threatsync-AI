@@ -1,7 +1,7 @@
 from langchain_community.document_loaders import JSONLoader, CSVLoader
 from langchain_chroma import Chroma
-#from langchain_huggingface import HuggingFaceEmbeddings
-#from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.prompts import PromptTemplate
@@ -56,13 +56,14 @@ for doc in raw_docs:
 # Embed MITRE data into Chroma
 #embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
 embeddings = HuggingFaceInferenceAPIEmbeddings(
-    api_key="Your_API_KEY", model_name="sentence-transformers/all-MiniLM-l6-v2"
+    api_key="your-api-key", model_name="sentence-transformers/all-MiniLM-l6-v2"
 )
 #embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=GOOGLE_API_KEY)
+
 mitre_store = Chroma.from_documents(
     documents=mitre_docs,
     embedding=embeddings,
-    persist_directory="chromadb"
+    persist_directory="mitredb"
 )
 
 # Step 3: Load and Process CSV Rules
@@ -78,7 +79,7 @@ for doc in rule_docs:
 rule_store = Chroma.from_documents(
     documents=rule_docs,
     embedding=embeddings,
-    persist_directory="rules_chromadb"
+    persist_directory="rulesdb"
 )
 
 # Step 4: MITRE Mapping Function
@@ -122,6 +123,25 @@ def process_report(report):
     for action in action_list:
         results[action] = evaluate_detection(action, rule_store)
 
+    # Presentable output
+    print("\n=== Threat Report Analysis ===\n")
+    print("Actions Extracted:")
+    for i, action in enumerate(action_list, 1):
+        print(f"{i}. {action}")
+
+    print("\nMITRE ATT&CK Mappings:")
+    for action, mapping in mappings.items():
+        print(f"- {action}:")
+        print(f"  Technique: {mapping['technique_id']} ({mapping['technique_name']})")
+        print(f"  Confidence Score: {mapping['score']:.4f}")
+
+    print("\nDetection Evaluation:")
+    for action, result in results.items():
+        print(f"- {action}:")
+        for line in result.split("\n"):
+            print(f"  {line}")
+
+    # Return raw data for further use if needed
     return {"actions": action_list, "mappings": mappings, "results": results}
 
 # Test
