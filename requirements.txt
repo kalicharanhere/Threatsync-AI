@@ -1,0 +1,8 @@
+langchain_community
+langchain_chroma
+langchain_huggingface
+langchain_text_splitters
+langchain_google_genai
+google-generativeai
+transformers
+huggingface_hub
